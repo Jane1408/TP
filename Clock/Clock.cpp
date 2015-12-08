@@ -58,24 +58,23 @@ ConvexShape InitHand(float height, float width) {
 
 void ClockFace(ClockFaceShape & face, RenderWindow & window) {
 	int degree = 0;
-	double X = 0;
-	double Y = 0;
+	Vector2f position;
 
 	while (degree < 360) {
-		X = (face.cirlce.getPosition().x + face.radius * cos(degree* M_PI / 180));
-		Y = (face.cirlce.getPosition().y + face.radius * sin(degree * M_PI / 180));
+		position.x = float(face.cirlce.getPosition().x + face.radius * cos(degree* M_PI / 180));		
+		position.y = float(face.cirlce.getPosition().y + face.radius * sin(degree * M_PI / 180));
 		if (degree % 90 == 0) {
-			face.big.setPosition(float(X), float(Y));
+			face.big.setPosition(position.x, position.y);
 			window.draw(face.big);
 			degree++;
 		}
 		else if (degree % 30 == 0) {
-			face.middle.setPosition(float(X), float(Y));
+			face.middle.setPosition(position.x, position.y);
 			window.draw(face.middle);
 			degree++;
 		}
 		else if (degree % 6 == 0) {
-			face.little.setPosition(float(X), float(Y));
+			face.little.setPosition(position.x, position.y);
 			window.draw(face.little);
 			degree++;
 		}
@@ -85,31 +84,42 @@ void ClockFace(ClockFaceShape & face, RenderWindow & window) {
 	}
 }
 
+void CircleOrigin(CircleShape & circle) {
+	circle.setOrigin(circle.getRadius() / 2, circle.getRadius() / 2);
+}
+
 void CreateClock(HourHandShape & hand, ClockFaceShape & face, RenderWindow & window) {
-	face.cirlce.setOrigin(face.cirlce.getRadius() / 2, face.cirlce.getRadius() / 2);
+	CircleOrigin(face.cirlce);
 	face.cirlce.setPosition(float(window.getSize().x / 2), float(window.getSize().y / 2));
-	face.center.setOrigin(face.center.getRadius() , face.center.getRadius());
+
+	CircleOrigin(face.center);
 	face.center.setPosition(float(window.getSize().x / 2), float(window.getSize().y / 2));
 	face.center.setFillColor(Color::Red);
+
+	CircleOrigin(face.big);
 	face.big.setFillColor(Color::Green);
-	face.big.setOrigin(face.big.getRadius() / 2, face.big.getRadius() / 2);
+
+	CircleOrigin(face.middle);
 	face.middle.setFillColor(Color::Cyan);
-	face.middle.setOrigin(face.middle.getRadius() / 2, face.middle.getRadius() / 2);
+
+	CircleOrigin(face.little);
 	face.little.setFillColor(Color::Yellow);
-	face.little.setOrigin(face.little.getRadius() / 2, face.little.getRadius() / 2);
 
 	hand.hour = InitHand(hand.hour_height, hand.hour_width);
 	hand.hour.setPosition(float(window.getSize().x / 2), float(window.getSize().y / 2));
 	hand.hour.setFillColor(Color::Blue);
+
 	hand.minute = InitHand(hand.minute_height, hand.minute_width);
 	hand.minute.setPosition(float(window.getSize().x / 2), float(window.getSize().y / 2));
 	hand.minute.setFillColor(Color::Blue);
+
 	hand.second = InitHand(hand.second_height, hand.second_width);
 	hand.second.setPosition(float(window.getSize().x / 2), float(window.getSize().y / 2));
 	hand.second.setFillColor(Color::Magenta);
 }
 
-void ClockHands(SYSTEMTIME & sysTime, HourHandShape & hand, RenderWindow & window) {
+void ClockHands(HourHandShape & hand, RenderWindow & window) {
+	SYSTEMTIME sysTime;
 	GetLocalTime(&sysTime);
 	float rotate = ((sysTime.wHour % hand.count_hours) * (360 / hand.count_hours) + sysTime.wMinute * (float(360) / float(hand.count_hours * hand.count_minutes)) + sysTime.wSecond * (360 / float(hand.count_hours * pow(hand.count_minutes, 2))));
 	hand.hour.setRotation(rotate);
@@ -123,7 +133,6 @@ void ClockHands(SYSTEMTIME & sysTime, HourHandShape & hand, RenderWindow & windo
 
 int main()
 {	
-	SYSTEMTIME sysTime;
 	ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	RenderWindow window(VideoMode(600, 600), "Clock", sf::Style::Default, settings);
@@ -131,7 +140,7 @@ int main()
 	ClockFaceShape face;
 	CreateClock(hand, face, window);	
 	while (window.isOpen()) {
-		ClockHands(sysTime, hand, window);
+		ClockHands(hand, window);
 		ClockFace(face, window);
 		Event event;
 		while (window.pollEvent(event)) {
