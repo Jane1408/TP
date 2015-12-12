@@ -10,20 +10,19 @@ using namespace std;
 
 
 struct Files {
-	string *files = new string[0];
+	string *files = nullptr;
 	int size = 0;
 	string path;
-}typedef Files;
+};
 
 struct Picture {
 	string name;
 	Texture *texture = new Texture;
-	float width;
-	float height;
+	Vector2f size;
 	Sprite *sprite = new Sprite;
-	int number = 0;
+	int picture_number = 0;
 
-}typedef Picture;
+};
 
 
 struct Configuration
@@ -52,9 +51,7 @@ struct ImageViewer {
 	sf::Sprite s_right;
 	sf::Sprite s_left;
 
-
-	float center_x;
-	float center_y;
+	Vector2f center;
 
 	float increase = 1;
 	float scale = 1;

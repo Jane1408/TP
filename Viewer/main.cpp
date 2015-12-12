@@ -18,9 +18,9 @@ bool isImage(string file_name) {
 		return false;
 	}
 	string ext_array[] = { "jpg","jpeg","png","gif","bmp" };
-	int i;
-	for (i = 0; i < 5; i++)
-		if (file_name.substr(file_name.find_last_of(".") + 1) == ext_array[i])
+	string name = file_name.substr(file_name.find_last_of(".") + 1);
+	for (string i : ext_array)
+		if (name == i)
 			return true;
 	return false;
 }
@@ -82,8 +82,8 @@ void BorderOfView(View & view, Picture *pic, float scale, float increase) {
 
 void InitiationImg(Vector2u window_size, Files files, Picture *picture) {
 	Image *image = new Image();
-	string path = files.path + files.files[picture->number];
-	image->loadFromFile(files.path + files.files[picture->number]);
+	string path = files.path + files.files[picture->picture_number];
+	image->loadFromFile(files.path + files.files[picture->picture_number]);
 	picture->texture = new Texture();
 	picture->texture->loadFromImage(*image);
 	delete(image);
@@ -91,7 +91,7 @@ void InitiationImg(Vector2u window_size, Files files, Picture *picture) {
 	picture->sprite->setPosition(float(window_size.x / 2.0), float((window_size.y * 0.75) / 2.0));
 	picture->sprite->setTexture(*(picture->texture));
 	picture->sprite->setOrigin(float(picture->texture->getSize().x / 2.0), float(picture->texture->getSize().y / 2.0));
-	picture->name = string(files.files[picture->number]);
+	picture->name = string(files.files[picture->picture_number]);
 
 }
 
@@ -168,10 +168,10 @@ bool IsBigger(ImageViewer & manager, Picture * pic) {
 
 void SetCentre(ImageViewer & manager, Picture * pic) {
 	if (manager.is_move && manager.increase != 1 && IsBigger(manager, pic)) {
-		manager.view.setCenter(manager.view.getCenter().x - (Mouse::getPosition(manager.window).x - manager.center_x), manager.view.getCenter().y - (Mouse::getPosition(manager.window).y - manager.center_y));
+		manager.view.setCenter(manager.view.getCenter().x - (Mouse::getPosition(manager.window).x - manager.center.x), manager.view.getCenter().y - (Mouse::getPosition(manager.window).y - manager.center.y));
 	}
-	manager.center_x = float(Mouse::getPosition(manager.window).x);
-	manager.center_y = float(Mouse::getPosition(manager.window).y);
+	manager.center.x = float(Mouse::getPosition(manager.window).x);
+	manager.center.y = float(Mouse::getPosition(manager.window).y);
 }
 
 void SetButtonPosition(ImageViewer & manager) {
@@ -200,6 +200,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 		while (manager.window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed) {
+				delete (picture.texture);
 				delete[] files.files;
 				manager.window.close();
 			}
@@ -215,19 +216,19 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 					float x(float(mousePos.x));
 					float y(float(mousePos.y));
 					if ((FloatRect(manager.view.getCenter().x - (manager.view.getSize().x / 2), float(manager.view.getCenter().y - (manager.t_left.getSize().y / 2)), float(manager.t_left.getSize().x), float(manager.t_left.getSize().y)).intersects(FloatRect(x, y, 1, 1)))) {
-						if (picture.number == 0) {
-							picture.number = files.size;
+						if (picture.picture_number == 0) {
+							picture.picture_number = files.size;
 						}
-						picture.number--;
+						picture.picture_number--;
 						InitiationImg(manager.window_size, files, &picture);
 						SetViewerCenter(manager);
 						manager.increase = 1;
 					}
 					else if ((FloatRect(float(manager.view.getCenter().x + (manager.view.getSize().x / 2) - manager.t_right.getSize().x), float(manager.view.getCenter().y - manager.t_right.getSize().y / 2), float(manager.t_right.getSize().x), float(manager.t_right.getSize().y)).intersects(FloatRect(x, y, 1, 1)))) {
-						if (picture.number + 1 == files.size) {
-							picture.number = -1;
+						if (picture.picture_number + 1 == files.size) {
+							picture.picture_number = -1;
 						}
-						picture.number++;
+						picture.picture_number++;
 						InitiationImg(manager.window_size, files, &picture);
 						manager.view.setCenter(float(manager.window_size.x / 2.0), float(manager.window_size.y / 2.0));
 						manager.increase = 1;
@@ -245,8 +246,8 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 					}
 					else {
 						manager.is_move = true;
-						manager.center_x = float(Mouse::getPosition(manager.window).x);
-						manager.center_y = float(Mouse::getPosition(manager.window).y);
+						manager.center.x = float(Mouse::getPosition(manager.window).x);
+						manager.center.y = float(Mouse::getPosition(manager.window).y);
 					}
 				}
 			}
@@ -256,19 +257,19 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 				}
 
 			if (Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-				if (picture.number == 0) {
-					picture.number = files.size;
+				if (picture.picture_number == 0) {
+					picture.picture_number = files.size;
 				}
-				picture.number--;
+				picture.picture_number--;
 				InitiationImg(manager.window_size, files, &picture);
 				SetViewerCenter(manager);
 				manager.increase = 1;
 			}
 			if (Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-				if (picture.number + 1 == files.size) {
-					picture.number = -1;
+				if (picture.picture_number + 1 == files.size) {
+					picture.picture_number = -1;
 				}
-				picture.number++;
+				picture.picture_number++;
 				InitiationImg(manager.window_size, files, &picture);
 				SetViewerCenter(manager);
 				manager.increase = 1;
@@ -297,10 +298,10 @@ int main() {
 	Initiation(manager);
 
 	Files files = getFileList(manager.path);
-	cout << files.size;
 	Picture picture;
 	picture.texture->loadFromFile("./files/transparent.png");
 	InitiationImg(manager.window_size, files, &picture);
 
 	Start(manager, files, picture);
+	
 	}
