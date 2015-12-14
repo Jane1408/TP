@@ -17,11 +17,11 @@ void Wheels(Car & car) {
 }
 
 void Initiation(RenderWindow & window, Car & car) {
-	car.t_car.loadFromFile("\pajero.png");
+	car.t_car.loadFromFile("pajero.png");
 	car.s_car.setTexture(car.t_car);
 	car.s_car.setPosition(10, float(window.getSize().y / 2));
 
-	car.t_wheel.loadFromFile("\wheel.png");
+	car.t_wheel.loadFromFile("wheel.png");
 	car.s_front_wheel.setTexture(car.t_wheel);
 	car.s_rear_wheel.setTexture(car.t_wheel);
 
