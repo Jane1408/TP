@@ -17,9 +17,10 @@ struct Files {
 
 struct Picture {
 	string name;
-	Texture *texture = new Texture;
+	Texture *texture;
 	Vector2f size;
-	Sprite *sprite = new Sprite;
+	Sprite *sprite;
+
 	int picture_number = 0;
 
 };
@@ -37,7 +38,7 @@ struct ImageViewer {
 	sf::RenderWindow window;
 
 	Vector2u window_size;
-	Vector2u size;
+	Vector2u image_size;
 
 	View view;
 

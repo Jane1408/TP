@@ -193,6 +193,11 @@ void Draw(ImageViewer & manager, Picture & picture) {
 	manager.window.clear(Color::White);
 }
 
+void DeleteImg(Picture & picture) {
+	delete (picture.texture);
+	delete (picture.sprite);
+}
+
 void Start(ImageViewer & manager, Files & files, Picture & picture) {
 	while (manager.window.isOpen())
 	{
@@ -200,7 +205,6 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 		while (manager.window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed) {
-				delete (picture.texture);
 				delete[] files.files;
 				manager.window.close();
 			}
@@ -219,6 +223,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 						if (picture.picture_number == 0) {
 							picture.picture_number = files.size;
 						}
+						DeleteImg(picture);
 						picture.picture_number--;
 						InitiationImg(manager.window_size, files, &picture);
 						SetViewerCenter(manager);
@@ -228,6 +233,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 						if (picture.picture_number + 1 == files.size) {
 							picture.picture_number = -1;
 						}
+						DeleteImg(picture);
 						picture.picture_number++;
 						InitiationImg(manager.window_size, files, &picture);
 						manager.view.setCenter(float(manager.window_size.x / 2.0), float(manager.window_size.y / 2.0));
@@ -260,6 +266,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 				if (picture.picture_number == 0) {
 					picture.picture_number = files.size;
 				}
+				DeleteImg(picture);
 				picture.picture_number--;
 				InitiationImg(manager.window_size, files, &picture);
 				SetViewerCenter(manager);
@@ -269,6 +276,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 				if (picture.picture_number + 1 == files.size) {
 					picture.picture_number = -1;
 				}
+				DeleteImg(picture);
 				picture.picture_number++;
 				InitiationImg(manager.window_size, files, &picture);
 				SetViewerCenter(manager);
@@ -287,6 +295,7 @@ void Start(ImageViewer & manager, Files & files, Picture & picture) {
 		SetButtonPosition(manager);
 		Draw(manager, picture);
 	}
+
 }
 
 
@@ -299,9 +308,9 @@ int main() {
 
 	Files files = getFileList(manager.path);
 	Picture picture;
-	picture.texture->loadFromFile("./files/transparent.png");
 	InitiationImg(manager.window_size, files, &picture);
 
 	Start(manager, files, picture);
+	DeleteImg(picture);
 	
 	}
