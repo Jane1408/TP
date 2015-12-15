@@ -26,5 +26,5 @@ struct Car
 	float speed;
 	float boost;
 
-	RectangleShape road;
+	
 };

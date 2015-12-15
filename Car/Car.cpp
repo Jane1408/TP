@@ -11,12 +11,12 @@
 
 using namespace sf;
 
-void Wheels(Car & car) {
+void UpdateWheelsPosition(Car & car) {
 	car.s_front_wheel.setPosition(car.s_car.getPosition().x + FRONT_WHEEL_POS.x, car.s_car.getPosition().y + FRONT_WHEEL_POS.y);
 	car.s_rear_wheel.setPosition(car.s_car.getPosition().x + REAR_WHEEL_POS.x, car.s_car.getPosition().y + REAR_WHEEL_POS.y);
 }
 
-void Initiation(RenderWindow & window, Car & car) {
+void Initiation(RenderWindow & window, Car & car, RectangleShape & road) {
 	car.t_car.loadFromFile("pajero.png");
 	car.s_car.setTexture(car.t_car);
 	car.s_car.setPosition(10, float(window.getSize().y / 2));
@@ -33,17 +33,17 @@ void Initiation(RenderWindow & window, Car & car) {
 	car.s_front_wheel.setOrigin(car.radius, car.radius);
 	car.s_rear_wheel.setOrigin(car.radius, car.radius);
 
-	Wheels(car);
+	UpdateWheelsPosition(car);
 
 	car.speed = 0;
 	car.boost = 0.00001f;
 
-	car.road.setSize(ROAD_SIZE);
-	car.road.setPosition(0, car.s_rear_wheel.getPosition().y + car.radius);
-	car.road.setFillColor(Color::Black);
+	road.setSize(ROAD_SIZE);
+	road.setPosition(0, car.s_rear_wheel.getPosition().y + car.radius);
+	road.setFillColor(Color::Black);
 }
 
-void Speed(Car & car) {
+void UpdateSpeed(Car & car) {
 	car.speed += car.boost;
 }
 
@@ -58,9 +58,9 @@ void RotateWheels(Car & car, float distantion) {
 }
 
 void MoveCar(Car & car) {
-	Speed(car);
+	UpdateSpeed(car);
 	car.s_car.move(car.speed, 0);
-	Wheels(car);
+	UpdateWheelsPosition(car);
 	RotateWheels(car, car.speed);
 
 }
@@ -74,22 +74,25 @@ void Boost(Car & car, RenderWindow & window) {
 	}
 }
 
+void DrawCar(RenderWindow & window, Car & car) {
+	window.draw(car.s_car);
+	window.draw(car.s_front_wheel);
+	window.draw(car.s_rear_wheel);
+}
 int main()
 {
 	ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	RenderWindow window(VideoMode(600, 400), "Lab8.1", sf::Style::Default, settings);
 	Car car;
-
-	Initiation(window, car);
+	RectangleShape road;
+	Initiation(window, car, road);
 	Clock clock;
 	while (window.isOpen())
 	{
 		MoveCar(car);
-		window.draw(car.s_car);
-		window.draw(car.s_front_wheel);
-		window.draw(car.s_rear_wheel);
-		window.draw(car.road);
+		DrawCar(window, car);
+		window.draw(road);
 		window.display();
 		window.clear(Color::White);
 		Boost(car, window);
