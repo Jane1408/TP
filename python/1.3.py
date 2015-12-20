@@ -21,7 +21,7 @@ def name_of_folder(name_folder):
             name += name_folder[i]
     return name
 
-def preserving_the_content_of_the_url(main_url, url, name_directory, main_dir):
+def preserving_the_content_of_the_url(main_url, url, name_directory, main_dir, list_extensions):
     extra_contents = ''
     name_directory = str(name_directory)
     new_dir = main_dir + '\\' + name_directory
@@ -61,51 +61,54 @@ def preserving_the_content_of_the_url(main_url, url, name_directory, main_dir):
     file_out.write(contents)
     file_out.close()
 
+def main():
+    list_extensions = ['gif', 'bmp', 'jpg', 'jpeg', 'png', 'js', 'css', 'html', 'ico', 'svg', 'swf']
+    main_dir = os.getcwd()
+    numb_pages = 100
 
-list_extensions = ['gif', 'bmp', 'jpg', 'jpeg', 'png', 'js', 'css', 'html', 'ico']
-main_dir = os.getcwd()
-numb_pages = 100
+    saved_pages = []
 
-saved_pages = []
+    no_mistakes = True
 
-no_mistakes = True
-
-main_url = raw_input('Enter site: ')
-word = raw_input('Enter word: ')
-name_directory = main_url[main_url.rfind('/') + 1:]
-contents = urllib2.urlopen(main_url).read()
-urls_list = re.findall('a.*?href="(.*?)"', contents)
-i = 0
-while (i < len(urls_list)) and (len(saved_pages) <= numb_pages):
-    if urls_list[i].find('http') < 0:
-        correct_url = main_url + urls_list[i]
-    else:
-        correct_url = urls_list[i]
-    if (urls_list[i].find('@') > 0) or (urls_list[i].find('#') > 0):
-        urls_list.pop(i)
-        no_mistakes = False
-    try:
-        contents = urllib2.urlopen(correct_url).read()
-    except IOError:
-        urls_list.pop(i)
-        no_mistakes = False
-    if no_mistakes:
-        if (contents.find(word) > 0) and (correct_url not in saved_pages) and (len(saved_pages) <= numb_pages) and \
-                (correct_url != (main_url + '/rss')):
-            try:
-                preserving_the_content_of_the_url(main_url, urls_list[i], name_directory, main_dir)
-                os.chdir(main_dir)
-                name_directory = name_of_folder(urls_list[i])
-                saved_pages.append(correct_url)
+    main_url = raw_input('Enter site: ')
+    word = raw_input('Enter word: ')
+    name_directory = main_url[main_url.rfind('/') + 1:]
+    contents = urllib2.urlopen(main_url).read()
+    urls_list = re.findall('a.*?href="(.*?)"', contents)
+    i = 0
+    while (i < len(urls_list)) and (len(saved_pages) <= numb_pages):
+        if urls_list[i].find('http') < 0:
+            correct_url = main_url + urls_list[i]
+        else:
+            correct_url = urls_list[i]
+        if (urls_list[i].find('@') > 0) or (urls_list[i].find('#') > 0):
+            urls_list.pop(i)
+            no_mistakes = False
+        try:
+            contents = urllib2.urlopen(correct_url).read()
+        except IOError:
+            urls_list.pop(i)
+            no_mistakes = False
+        if no_mistakes:
+            if (contents.find(word) > 0) and (correct_url not in saved_pages) and (len(saved_pages) <= numb_pages) and \
+                    (correct_url != (main_url + '/rss')):
+                try:
+                    preserving_the_content_of_the_url(main_url, urls_list[i], name_directory, main_dir, list_extensions)
+                    os.chdir(main_dir)
+                    name_directory = name_of_folder(urls_list[i])
+                    saved_pages.append(correct_url)
+                    if len(urls_list) <= 1000:
+                        urls_list += re.findall('a.*?href="(.*?)"', contents)
+                    urls_list.pop(i)
+                except IOError:
+                    urls_list.pop(i)
+            elif (contents.find(word) < 0) and (correct_url not in saved_pages):
                 if len(urls_list) <= 1000:
                     urls_list += re.findall('a.*?href="(.*?)"', contents)
                 urls_list.pop(i)
-            except IOError:
+            elif ((contents.find(word) > 0) and (correct_url in saved_pages)) or (correct_url == (main_url + '/rss')):
                 urls_list.pop(i)
-        elif (contents.find(word) < 0) and (correct_url not in saved_pages):
-            if len(urls_list) <= 1000:
-                urls_list += re.findall('a.*?href="(.*?)"', contents)
-            urls_list.pop(i)
-        elif ((contents.find(word) > 0) and (correct_url in saved_pages)) or (correct_url == (main_url + '/rss')):
-            urls_list.pop(i)
-    no_mistakes = True
+        no_mistakes = True
+
+if __name__ == "__main__":
+    main()
