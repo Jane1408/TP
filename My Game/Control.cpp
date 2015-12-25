@@ -62,7 +62,7 @@ void controlPlayer(Sprite & sprite, float & time, enum::Keyboard::Key go_left, e
 		break;
 	}
 }
-
+/*
 void AttackControlPlayer(Sprite & sprite, float & time, enum::Keyboard::Key go_left, enum::Keyboard::Key go_right, enum::Keyboard::Key go_up, enum::Keyboard::Key go_down, int w, int h) {
 		if (Keyboard::isKeyPressed(go_right)) { direction = to_right; }
 		else if (Keyboard::isKeyPressed(go_left)) { direction = to_left; }
@@ -117,3 +117,4 @@ void AttackControlPlayer(Sprite & sprite, float & time, enum::Keyboard::Key go_l
 		}
 }
 
+*/

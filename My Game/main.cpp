@@ -2,10 +2,14 @@
 //
 #include "stdafx.h"
 //#include <SFML/Graphics.hpp>
+#include <fstream>
+#include <string>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <list>
+#include <algorithm>
+#include <memory>
 #include "Struct.h"
 #include "level.h"
 #include "view.h"
@@ -16,39 +20,42 @@
 #include "InitiationGame.h"
 
 
+
 using namespace sf;
 using namespace std;
 
-void FindNpcPositions(Level & lvl, NPCConfig & config, list<std::shared_ptr<NonPlayer>> * NPCs) {
-	std::vector<Object> all_obj;
-	all_obj = lvl.GetAllObjects();
-	string Name;
-	string npc_check = "npc_";
-	for (int i = 0; i < all_obj.size(); i++) {
-		Name = "";
-		if (all_obj[i].name.size() >= 4) {
-			Name = all_obj[i].name;
-			Name.erase(4, all_obj[i].name.size());
-			if (Name == npc_check) {
-				Name = all_obj[i].name;
-				Name.erase(0, 4);
-				config.position_npc.insert(pair<string, Vector2f>(Name, { all_obj[i].rect.left, all_obj[i].rect.top }));
-				NPCs->push_back(std::make_shared<NonPlayer>(Name, config));
+struct GameConfig {
 
-			}
-		}
-	}
+	std::shared_ptr<RenderWindow> window;
+	std::shared_ptr<View> view;
+	std::shared_ptr<Level> lvl;
+	std::string name_game = "Adventure Time or Die";
+	std::string lvl_map = "level1.tmx";
+
+};
+
+void InitGame(shared_ptr<GameConfig> & game) {
+	game->window = std::make_shared<RenderWindow>(sf::VideoMode(640, 480), game->name_game);
+	game->lvl = std::make_shared<Level>();
+	game->lvl->LoadFromFile(game->lvl_map);
+	game->view = std::make_shared<View>();
+	game->view->reset(FloatRect(0, 0, 640, 480));
+
 }
 
 int main()
 {
-	NPCConfig config;
 
-	RenderWindow window(VideoMode(640, 480), "Adventure Time or Die");
-	view.reset(FloatRect(0, 0, 640, 480));
+	std::shared_ptr<NPCConfig> npc_config = std::make_shared<NPCConfig>();
+	std::shared_ptr<PlayerConfig> player_config = std::make_shared<PlayerConfig>();
+	std::shared_ptr<BonusConfig> bonus_config = std::make_shared<BonusConfig>();
+	Mission mission;
+	std::shared_ptr<GameConfig> game = std::make_shared<GameConfig>();
+	//GameConfig game;
 
-	list<Bonuses*>  bonuses;
-	list<Bonuses*>::iterator it;
+	InitGame(game);
+	list<std::shared_ptr<Bonuses>> bonuses;
+	list<std::shared_ptr<Bonuses>>::iterator bonus;
 
 	list<std::shared_ptr<NonPlayer>> NPCs;
 	list<std::shared_ptr<NonPlayer>>::iterator character;
@@ -58,36 +65,22 @@ int main()
 	Text text("", font, 20);
 	text.setColor(Color::Black);
 
-	Level lvl;
-	lvl.LoadFromFile("level1.tmx");
+	Object player_obj = game->lvl->GetObject("Player");
 
-	Image heroImage;
-	heroImage.loadFromFile("images/firehero123.png");
+	FindNpcPositions(*game->lvl, *npc_config, &NPCs);
 
-	Image BonusImage;
-	BonusImage.loadFromFile("images/stars.png");
+	InitBonuses(*game->lvl, *bonus_config, &bonuses);
+	Player p(*player_config, *game->lvl, player_obj.rect.left, player_obj.rect.top);
 
-	Object player = lvl.GetObject("Player");
+	NonPlayer bg("BubbleGum", *npc_config);
 
-	Object non_player_obj = lvl.GetObject("NPC");
 
-	FindNpcPositions(lvl, config, &NPCs);
-
-	std::vector<Object> bonus = lvl.GetObjects("bonus");
-
-	for (int i = 0; i < bonus.size(); i++)
-		bonuses.push_back(new Bonuses(BonusImage, "Star", lvl, bonus[i].rect.left, bonus[i].rect.top, BONUS_SIZE.x, BONUS_SIZE.y));
-	
-	Player p(heroImage, "FirePrincess", lvl, player.rect.left, player.rect.top, 50, 98, 0);
-	NonPlayer bg("BubbleGum", config);
-
-	Mission mission;
 	InitMisionScroll(mission);
 
 	bool showMissionText = true;
-	bool gun = false;
+
 	Clock clock;
-	while (window.isOpen())
+	while (game->window->isOpen())
 	{
 
 		float time = clock.getElapsedTime().asMicroseconds();
@@ -95,22 +88,13 @@ int main()
 
 		time = time / 800;
 		
-		if (Keyboard::isKeyPressed(Keyboard::A)) {
-			cout << gun << endl;
-			if (gun == true) {
-				gun = false;
-			}
-			else {
-				gun = true;
-			}
+		controlPlayer(*p.sprite, time, Keyboard::Key::Left, Keyboard::Key::Right, Keyboard::Key::Up, Keyboard::Key::Down, player_config->size_player.x, player_config->size_player.y);
 
-		}
-	//	cout << gun<< "!!!!" << endl;
 		Event event;
-		while (window.pollEvent(event))
+		while (game->window->pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
-				window.close();
+				game->window->close();
 		
 			if (event.type == Event::KeyPressed)
 				if ((event.key.code == Keyboard::Tab)) {
@@ -120,11 +104,10 @@ int main()
 					case true: {
 						ostringstream playerHealthString;
 						ostringstream playerScoreString;
-						playerHealthString << p.health; 
 						playerScoreString << p.playerScore;
 						ostringstream task;
 						task << getTextMission(getCurrentMission(p.playerScore));
-						text.setString("Здоровье: " + playerHealthString.str() + "\n" + task.str() + "\n" + "Собрано звезд: " + playerScoreString.str());
+						text.setString(task.str() + "\n" + "Собрано звезд: " + playerScoreString.str());
 						showMissionText = false;
 						break;
 					}
@@ -137,61 +120,50 @@ int main()
 			}
 
 		}
-		switch (gun) {
-		case true: {
-			AttackControlPlayer(*p.sprite, time, Keyboard::Key::Left, Keyboard::Key::Right, Keyboard::Key::Up, Keyboard::Key::Down, p.w, p.h); break;
-		}
-		case false: {
-			controlPlayer(*p.sprite, time, Keyboard::Key::Left, Keyboard::Key::Right, Keyboard::Key::Up, Keyboard::Key::Down, p.w, p.h); break;
+		
+
+		for (std::shared_ptr<Bonuses> bonus : bonuses) {
+			bonus->update(time); 
 		}
 
-		}
-		bg.update(time, config);
-		for (it = bonuses.begin(); it != bonuses.end(); it++) { (*it)->Animation(time); }
-	
-//		for (ent = enemies.begin(); ent != enemies.end(); ent++) { (*ent)->update(time); }
-		p.update(time);
+		bg.update(time, *npc_config);
+		p.update(time, *player_config, *game->view);
 
-//		for (ent = enemies.begin(); ent != enemies.end(); ent++) { (*ent)->Animation(time); }
-		for (it = bonuses.begin(); it != bonuses.end(); it++)
+		//function
+		for (std::shared_ptr<Bonuses> bonus : bonuses)
 		{
-			if ((*it)->getRect().intersects(p.getRect()))
+			if (bonus->getRect().intersects(p.getRect(*player_config)))
 			{
-				
-				if ((*it)->name == "Star") {
-
-					 (*it)->draw = false; 
+				//исправить
+				if (bonus->name == "Star") {
+					bonus->draw = false;
+					p.playerScore += 1;
 					}
 				}
 			}
+		//*************
+		//function
+			auto _is_catch = [](std::shared_ptr<Bonuses> bon) {return !bon->draw;};
+			bonuses.erase(remove_if(bonuses.begin(), bonuses.end(), _is_catch), bonuses.end());
+		//*************
 
-		for (it = bonuses.begin(); it != bonuses.end();)
-		{
-			Bonuses *b = *it;
-			b->update(time);
-			if (b->draw == false) {
-				it = bonuses.erase(it); delete b; p.playerScore += 1;
-			}
-			else it++;
-		}
-		
-		window.setView(view);
-		window.clear();
-		lvl.Draw(window);
+		game->window->setView(*game->view);
+		game->window->clear();
+		game->lvl->Draw(*game->window);
 
 		if (!showMissionText) {
-			text.setPosition(view.getCenter().x + 25, view.getCenter().y - 220);
-			mission.s_scroll.setPosition(view.getCenter().x + view.getSize().x / 2 - MISSION_SCROLL_SIZE.x, view.getCenter().y - view.getSize().y / 2);	
-			window.draw(mission.s_scroll); window.draw(text); 
-		}
-		for (it = bonuses.begin(); it != bonuses.end(); it++) {
-				window.draw(*(*it)->sprite); 
+			text.setPosition(game->view->getCenter().x + 25, game->view->getCenter().y - 220);
+			mission.s_scroll->setPosition(game->view->getCenter().x + game->view->getSize().x / 2 - MISSION_SCROLL_SIZE.x, game->view->getCenter().y - game->view->getSize().y / 2);
+			game->window->draw(*mission.s_scroll); game->window->draw(text);
 		}
 
-		window.draw(*bg.sprite);
-		window.draw(*p.sprite);
+		for (std::shared_ptr<Bonuses> bonus : bonuses) {
+			game->window->draw(*bonus->sprite);
+		}
+		game->window->draw(*bg.sprite);
+		game->window->draw(*p.sprite);
 
-		window.display();
+		game->window->display();
 	}
 	return 0;
 }

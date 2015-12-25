@@ -3,12 +3,7 @@
 //#include <SFML/Graphics.hpp>
 //#include "view.h"
 
-struct Mission
-{
-	Texture t_scroll;
-	Sprite s_scroll;
 
-};
 ///////////////////////////////////НОМЕР МИССИИ//////////////////////////////////
 
 int getCurrentMission(int a)//ф-ция номера миссия, которая меняет номер миссии, в зависимости от координаты игрока Х (сюда будем передавать эту координату)
@@ -39,3 +34,4 @@ std::string getTextMission(int currentMission) {
 
 	return missionText;//ф-ция возвращает текст
 };
+

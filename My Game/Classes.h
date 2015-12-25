@@ -14,135 +14,108 @@ using namespace std;
 class Bonuses {
 public:
 	std::vector<Object> obj;
-	float dx, dy, x, y, AFrame;
+	float dx, dy, x, y;
 	int w, h;
 	bool draw;
 	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Sprite> sprite;
+	Image image;
 	String name, lev;
-	Bonuses(Image &image, String Name, Level &lev, float X, float Y, int W, int H) {
+	Bonuses(BonusConfig & config, String Name, Level &lev, float X, float Y, int W, int H) {
 		x = X; y = Y; w = W; h = H; name = Name;
-		dx = 0; dy = 0; AFrame = 0;
+		dx = 0; dy = 0;
 		draw = true;
 		texture = std::make_shared<Texture>();
 		sprite = std::make_shared<Sprite>();
+		image.loadFromFile(config.img_bonus);
 		texture->loadFromImage(image);
 		sprite->setTexture(*texture);
 		sprite->setOrigin(float(w / 2), float(h / 2));
 		obj = lev.GetAllObjects();
 		if (name == "Star") {
-		sprite->setTextureRect(IntRect(0, 0, w, h));
-	}
-	
-	}
-
-	void update(float time) {
-		if (draw == true) {
-			sprite->setPosition(x + w / 2, y + h / 2);
+			sprite->setTextureRect(IntRect(0, 0, w, h));
 		}
-
-		
+		sprite->setPosition(x + w / 2, y + h / 2);
 	}
-	void Animation(float & time) {
-		if (draw == true) {
+	void _animation(float & time) {
 			sprite->setRotation(sprite->getRotation() + time / 25);
-		}
-
 	}
+	void update(float time) {
+		_animation(time);
+	}
+
+
 
 	FloatRect getRect() {
 		return FloatRect(x, y, w, h);
 	}
 };
 
-class Entity {
+//////////////////////////////////////////////////// À¿—— »√–Œ ¿////////////////////////
+class Player {
 public:
 	std::vector<Object> obj;
-	float dx, dy, x, y, speed, moveTimer, A;
-	int w, h, health, position;
-	bool life, isMove, battle;
+	Vector2f position;
+	float  dx, dy, speed;
+	bool isMove;
 	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Sprite> sprite;
+	Image image;
 	String name;
-	Entity(Image &image, String Name, float X, float Y, int W, int H, int P) {
-		x = X; y = Y; w = W; h = H; name = Name; moveTimer = 0; position = P;
-		speed = 0; health = 100; dx = 0; dy = 0; A = 0;
-		life = true; isMove = false;
-		texture = std::make_shared<Texture>();
-		sprite = std::make_shared<Sprite>();
-		texture->loadFromImage(image);
-		sprite->setTexture(*texture);
-		sprite->setOrigin(float(w / 2), float(h / 2));
-	}
-
-		void Animation(float time) {
-		A += 0.1*time;
-		if (A > 8) A -= 8;
-		sprite->setTextureRect(IntRect(w * int(A), 0, w, 120));
-//		sprite.move(-0.1*time, 0);
-	}
-};
-//////////////////////////////////////////////////// À¿—— »√–Œ ¿////////////////////////
-class Player :public Entity {
-public:
 	enum { left, right, up, down, stay } state;
-//	enum { above, below, onright, onleft } location;
 	int playerScore;
 
-	Player(Image &image, String Name, Level &lev, float X, float Y, int W, int H, int P) :Entity(image, Name, X, Y, W, H, P) {
+	Player(PlayerConfig & config, Level & lvl, float x, float y) {
+		position = { x, y };
 		playerScore = 0;
-		state = stay; 
-		obj = lev.GetAllObjects(); 
-		speed = 0.1; 
-		battle = false;
-		if (name == "FirePrincess") {
-			sprite->setTextureRect(IntRect(0, position, w, h));
-		}
+		state = stay;
+		obj = lvl.GetAllObjects();
+		speed = 0.1;
+		texture = std::make_shared<Texture>();
+		sprite = std::make_shared<Sprite>();
+		image.loadFromFile(config.img_player);
+		texture->loadFromImage(image);
+		sprite->setTexture(*texture);
+		sprite->setOrigin(float(config.size_player.x / 2), float(config.size_player.y / 2));
+		sprite->setTextureRect(IntRect(0, 0, config.size_player.x, config.size_player.y));
+
 	}
 
-	void control() {
+	void _control() {
 		if (Keyboard::isKeyPressed) {
-			if (Keyboard::isKeyPressed(Keyboard::Left)) {
-				state = left;
-			}
-			else if (Keyboard::isKeyPressed(Keyboard::Right)) {
-				state = right;
-			}
+			if (Keyboard::isKeyPressed(Keyboard::Left)) { state = left; }
 
-			else if (Keyboard::isKeyPressed(Keyboard::Up)) {
-				state = up; 
-			}
+			else if (Keyboard::isKeyPressed(Keyboard::Right)) { state = right; }
 
-			else if (Keyboard::isKeyPressed(Keyboard::Down)) {
-				state = down;
-			}
+			else if (Keyboard::isKeyPressed(Keyboard::Up)) { state = up; }
+			
+			else if (Keyboard::isKeyPressed(Keyboard::Down)) { state = down; }
 		}
 	}
-	FloatRect getRect() {
-		return FloatRect(x, y + h * 0.75, w, h * 0.25);
+
+	FloatRect getRect(PlayerConfig & config) {
+		return FloatRect(position.x, position.y + config.size_player.y * 0.75, config.size_player.x, config.size_player.y * 0.25);
 	}
 
-	void checkCollisionWithMap(float Dx, float Dy)
+	void _checkCollisionWithMap(float Dx, float Dy, PlayerConfig & config)
 	{
-
-		for (int i = 0; i<obj.size(); i++)
-			if (getRect().intersects(obj[i].rect))
+		for (int i = 0; i < obj.size(); i++)
+			if (getRect(config).intersects(obj[i].rect))
 			{
-				if ((obj[i].name == "solid")  ){
-					if (Dy > 0) { y = obj[i].rect.top - h;  dy = 0; }
-					if (Dy < 0) { y = obj[i].rect.top + obj[i].rect.height - 0.75 * h;   dy = 0; }
-					if (Dx > 0) { x = obj[i].rect.left - w; dx = 0; }
-					if (Dx < 0) { x = obj[i].rect.left + obj[i].rect.width; dx = 0; }
+				if ((obj[i].name == "solid")) {
+					if (Dy > 0) { position.y = obj[i].rect.top - config.size_player.y;  dy = 0; }
+					if (Dy < 0) { position.y = obj[i].rect.top + obj[i].rect.height - 0.75 * config.size_player.y;   dy = 0; }
+					if (Dx > 0) { position.x = obj[i].rect.left - config.size_player.x; dx = 0; }
+					if (Dx < 0) { position.x = obj[i].rect.left + obj[i].rect.width; dx = 0; }
 				}
 			}
+	}
 	
+
 	
-			}
-	
-	
-	void update(float time)
+	void update(float time, PlayerConfig & config, View & view)
 	{
-		control();
+		_control();
 		switch (state)
 		{
 		case right: dx = speed; dy = 0; break;
@@ -151,44 +124,17 @@ public:
 		case down: dx = 0;dy = speed;break;
 		case stay: dx = 0; dy = 0;break;
 		}
-		x += dx*time;
-		checkCollisionWithMap(dx, 0);
-		y += dy*time;
-		checkCollisionWithMap(0, dy);
-		sprite->setPosition(x + w / 2, y + h / 2);
-		if (health <= 0) { life = false; }
+		position.x += dx*time;
+		_checkCollisionWithMap(dx, 0, config);
+		position.y += dy*time;
+		_checkCollisionWithMap(0, dy, config);
+		sprite->setPosition(position.x + config.size_player.x / 2, position.y + config.size_player.y / 2);
 		if (!isMove) { state = stay; }
-//		setPlayerCoordinateForView(x, y);
-		if (life) { setPlayerCoordinateForView(x, y); }
+		setPlayerCoordinateForView(position.x, position.y, view);
+		
 	}
 };
-/*class Enemy :public Entity {
-public:
 
-	float A;
-	Enemy(Image &image, String Name, Level &lvl, float X, float Y, int W, int H, int P) :Entity(image, Name, X, Y, W, H, P) {
-		A = 0;
-
-		if (name == "enemy") {
-			sprite->setTextureRect(IntRect(0, 0, w, h));
-		}
-	}
-	void Animation(float time) {
-		A += 0.005*time;
-		if (A > 8) A -= 8;
-		sprite->setTextureRect(IntRect(w * int(A), 0, w, h));
-	}
-	void update(float time)
-	{
-
-		if (name == "enemy") {
-			sprite->setPosition(x + w / 2, y + h / 2);
-			if (health <= 0) { life = false; }
-		}
-	}
-
-
-};*/
 
 
 class NonPlayer {
