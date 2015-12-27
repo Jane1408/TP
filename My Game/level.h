@@ -36,7 +36,7 @@ public:
 	Object GetObject(std::string name);
 	std::vector<Object> GetObjects(std::string name);//выдаем объект в наш уровень
 	std::vector<Object> GetAllObjects();//выдаем все объекты в наш уровень
-	void Draw(sf::RenderWindow &window);//рисуем в окно
+	void DrawMap(sf::RenderWindow &window);//рисуем в окно
 	sf::Vector2i GetTileSize();//получаем размер тайла
 
 private:

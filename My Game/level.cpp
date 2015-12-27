@@ -285,7 +285,7 @@ sf::Vector2i Level::GetTileSize()
 	return sf::Vector2i(tileWidth, tileHeight);
 }
 
-void Level::Draw(sf::RenderWindow &window)
+void Level::DrawMap(sf::RenderWindow &window)
 {
 	// рисуем все тайлы (объекты не рисуем!)
 	for (int layer = 0; layer < layers.size(); layer++)

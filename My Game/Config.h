@@ -1,8 +1,7 @@
 #pragma once
-//#include <SFML\Graphics.hpp>
+#include "classPlayer.h"
+#include <memory>
 
-
-static const sf::Vector2f MISSION_SCROLL_SIZE = { 277, 216 };
-
-static const sf::Vector2f BONUS_SIZE = { 32, 32 };
-
+struct Hero {
+	std::shared_ptr<Player> player;
+};

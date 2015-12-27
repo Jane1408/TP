@@ -3,18 +3,28 @@
 //#include <SFML/Graphics.hpp>
 #include <vector>
 #include <map>
-//#include <list>
+#include <list>
 #include <memory>
 //#include "Classes.h"
-//#include "level.h"
+//#include "classPlayer.h"
+#include "level.h"
 
 using namespace sf;
 
+struct GameConfig {
 
+	std::shared_ptr<RenderWindow> window;
+	std::shared_ptr<View> view;
+	std::shared_ptr<Level> lvl;
+	std::string name_game = "Adventure Time or Die";
+	std::string lvl_map = "level1.tmx";
 
-struct BonusConfig {
-	std::string img_bonus = "images/stars.png";
 };
+
+struct BonusConfig  {
+	std::string img_bonus = "images/stars.png";
+	sf::Vector2f bonus_size = { 32, 32 };
+} ;
 
 struct NPCConfig {
 	std::map <std::string, std::string> img_npc = { {"BubbleGum", "./images/booblegum.png"}
@@ -23,7 +33,7 @@ struct NPCConfig {
 	std::map <std::string, Vector2f> size_npc = { { "BubbleGum" , { 50, 100}}
 
 	};
-	std::map < std::string, std::vector<int> > frame_pos_npc = { { "BubbleGum" , {0,50,100,150,200,250}  }
+	std::map < std::string, std::vector<int> > frame_pos_npc = { {"BubbleGum" , {0,50,100,150,200,250}  }
 
 	};
 	std::map <std::string, Vector2f> position_npc = {
@@ -40,11 +50,32 @@ struct NPCConfig {
 struct PlayerConfig {
 	std::string img_player = "images/firehero123.png";
 	sf::Vector2f size_player = { 50, 98 };
+	
 };
 
 struct Mission
 {
+	Image img_scroll;
 	std::shared_ptr<Texture>  t_scroll;
 	std::shared_ptr<Sprite> s_scroll;
+	bool showMissionText = true;
+	sf::Vector2f scroll_size = { 277, 216 };
+};
+
+struct Information
+{
+	Font font;
+	Text *text;
+	int font_size = 20;
+	std::string font_file = "CyrilicOld.ttf";
+};
+
+/*struct Lists {
+	std::list<std::shared_ptr<Bonuses>> bonuses;
+	std::list<std::shared_ptr<Bonuses>>::iterator bonus;
+
+	std::list<std::shared_ptr<NonPlayer>> NPCs;
+	std::list<std::shared_ptr<NonPlayer>>::iterator character;
 
 };
+*/
