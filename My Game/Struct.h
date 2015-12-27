@@ -49,8 +49,13 @@ struct NPCConfig {
 
 struct PlayerConfig {
 	std::string img_player = "images/firehero123.png";
-	sf::Vector2f size_player = { 50, 98 };
-	
+	sf::Vector2f size_player = { 50, 100 };
+	int num_frame_move = 8;
+	int num_frame_stay = 6;
+	int other_size_one = 54;
+	int other_size_two = 56;
+	int other_size_three = 62;
+
 };
 
 struct Mission

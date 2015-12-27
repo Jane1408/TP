@@ -21,26 +21,53 @@ void GetBonus(PlayerConfig & player_config, std::list<std::shared_ptr<Bonuses>> 
 
 }
 
-void Update(PlayerConfig & player_config, NPCConfig & npc_config, std::list<std::shared_ptr<Bonuses>> * bonuses, std::list<std::shared_ptr<NonPlayer>> * NPCs, Hero & hero, float time, GameConfig & game) {
+void _updateBonus(std::list<std::shared_ptr<Bonuses>> * bonuses, float time) {
 	for (std::shared_ptr<Bonuses> bonus : *bonuses) {
 		bonus->update(time);
 	}
+}
+
+void _updateNPCs(std::list<std::shared_ptr<NonPlayer>> * NPCs, NPCConfig & npc_config, float time) {
 	for (std::shared_ptr<NonPlayer> NPC : *NPCs) {
 		NPC->update(time, npc_config);
 	}
+}
+
+void _updatePlayer(PlayerConfig & player_config, Hero & hero, float time, GameConfig & game) {
 	hero.player->update(time, player_config, *game.view);
 }
 
-void Draw(std::list<std::shared_ptr<Bonuses>> * bonuses, std::list<std::shared_ptr<NonPlayer>> * NPCs, Hero & hero, GameConfig & game) {
+void Update(PlayerConfig & player_config, NPCConfig & npc_config, std::list<std::shared_ptr<Bonuses>> * bonuses, std::list<std::shared_ptr<NonPlayer>> * NPCs, Hero & hero, float time, GameConfig & game) {
+	_updateBonus(bonuses, time);
+	_updateNPCs(NPCs, npc_config, time);
+	_updatePlayer(player_config, hero, time, game);
+}
+
+void _drawLevel(GameConfig & game) {
 	game.lvl->DrawMap(*game.window);
+}
+
+void _drawBonus(std::list<std::shared_ptr<Bonuses>> * bonuses, GameConfig & game) {
 	for (std::shared_ptr<Bonuses> bonus : *bonuses) {
 		game.window->draw(*bonus->sprite);
 	}
+}
 
+void _drawNPCs(std::list<std::shared_ptr<NonPlayer>> * NPCs, GameConfig & game) {
 	for (std::shared_ptr<NonPlayer> NPC : *NPCs) {
 		game.window->draw(*NPC->sprite);
 	}
+}
+
+void _drawPlayer(Hero & hero, GameConfig & game) {
 	game.window->draw(*hero.player->sprite);
+}
+
+void Draw(std::list<std::shared_ptr<Bonuses>> * bonuses, std::list<std::shared_ptr<NonPlayer>> * NPCs, Hero & hero, GameConfig & game) {
+	_drawLevel(game);
+	_drawBonus(bonuses, game);
+	_drawNPCs(NPCs, game);
+	_drawPlayer(hero, game);
 }
 
 
@@ -53,7 +80,7 @@ void StarGame(std::list<std::shared_ptr<Bonuses>> * bonuses, std::list<std::shar
 
 		time = time / 800;
 
-		controlPlayer(*hero.player->sprite, time, Keyboard::Key::Left, Keyboard::Key::Right, Keyboard::Key::Up, Keyboard::Key::Down, player_config.size_player.x, player_config.size_player.y);
+		controlPlayer(hero, player_config, time, Keyboard::Key::Left, Keyboard::Key::Right, Keyboard::Key::Up, Keyboard::Key::Down);
 
 		Event event;
 		while (game.window->pollEvent(event))
