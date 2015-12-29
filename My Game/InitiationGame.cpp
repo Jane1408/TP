@@ -31,7 +31,7 @@ void InitGame(GameConfig & game) {
 
 void InitBonuses(GameConfig & game, BonusConfig & config, std::list<std::shared_ptr<Bonuses>> * bonuses) {
 	std::vector<Object> bonus = game.lvl->GetObjects("bonus");
-	for (int i = 0; i < bonus.size(); i++)
+	for (int i = 0; i < int(bonus.size()); i++)
 		bonuses->push_back(std::make_shared<Bonuses>(config, "Star", bonus[i].rect.left, bonus[i].rect.top, config.bonus_size.x, config.bonus_size.y));
 }
 
@@ -40,7 +40,7 @@ void InitNpc(GameConfig & game, NPCConfig & config, std::list<std::shared_ptr<No
 	all_obj = game.lvl->GetAllObjects();
 	std::string Name;
 	std::string npc_check = "npc_";
-	for (int i = 0; i < all_obj.size(); i++) {
+	for (int i = 0; i < int(all_obj.size()); i++) {
 		Name = "";
 		if (all_obj[i].name.size() >= 4) {
 			Name = all_obj[i].name;

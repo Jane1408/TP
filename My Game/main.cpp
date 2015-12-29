@@ -18,7 +18,6 @@ using namespace sf;
 using namespace std;
 
 
-
 int main()
 {	
 	std::shared_ptr<PlayerConfig> player_config = std::make_shared<PlayerConfig>();
@@ -30,9 +29,7 @@ int main()
 	std::shared_ptr<Hero> hero = std::make_shared<Hero>();
 
 	std::list<std::shared_ptr<Bonuses>> bonuses;
-	std::list<std::shared_ptr<Bonuses>>::iterator bonus;
 	std::list<std::shared_ptr<NonPlayer>> NPCs;
-	std::list<std::shared_ptr<NonPlayer>>::iterator character;
 
 	InitGame(*game);
 	InitBonuses(*game, *bonus_config, &bonuses);
@@ -40,7 +37,7 @@ int main()
 	InitNpc(*game, *npc_config, &NPCs);
 	InitMisionScroll(*mission);
 	InitPlayer(*player_config, *game, *hero);	
-	StarGame(&bonuses, &NPCs, *player_config, *npc_config, *hero, *game);
+	StartGame(bonuses, NPCs, *player_config, *npc_config, *hero, *game);
 	
 	return 0;
 }

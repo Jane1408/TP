@@ -18,7 +18,7 @@ struct GameConfig {
 	std::shared_ptr<Level> lvl;
 	std::string name_game = "Adventure Time or Die";
 	std::string lvl_map = "level1.tmx";
-
+	float time_config = 0.00125f;
 };
 
 struct BonusConfig  {
@@ -27,13 +27,16 @@ struct BonusConfig  {
 } ;
 
 struct NPCConfig {
-	std::map <std::string, std::string> img_npc = { {"BubbleGum", "./images/booblegum.png"}
+	std::map <std::string, std::string> img_npc = { {"BubbleGum", "./images/booblegum.png"},
+	{"Pryanik", "./images/pryanik.png"}
 
 	};
-	std::map <std::string, Vector2f> size_npc = { { "BubbleGum" , { 50, 100}}
+	std::map <std::string, Vector2f> size_npc = { { "BubbleGum" , { 50, 100}},
+	{ "Pryanik" , {58, 62}}
 
 	};
-	std::map < std::string, std::vector<int> > frame_pos_npc = { {"BubbleGum" , {0,50,100,150,200,250}  }
+	std::map < std::string, std::vector<int> > frame_pos_npc = { {"BubbleGum" , {0,50,100,150,200,250}  },
+	{ "Pryanik" , {0, 58, 116, 174, 232, 290,348, 406, 464, 522, 580,638}}
 
 	};
 	std::map <std::string, Vector2f> position_npc = {
@@ -55,7 +58,7 @@ struct PlayerConfig {
 	int other_size_one = 54;
 	int other_size_two = 56;
 	int other_size_three = 62;
-
+	
 };
 
 struct Mission

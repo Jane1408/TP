@@ -1,5 +1,7 @@
 #pragma once
 #include "classPlayer.h"
+#include "classNonPlayer.h"
+#include "classBonuses.h"
 #include <memory>
 
 struct Hero {
@@ -9,3 +11,4 @@ struct Hero {
 	int num_frame_move = 8;
 	int num_frame_stay = 6;
 };
+
